@@ -28,6 +28,7 @@ import os
 import subprocess
 
 from libqtile import bar, layout, widget
+from libqtile.backend.wayland.inputs import Keyboard
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile import hook
@@ -39,6 +40,9 @@ terminal = "kitty"
 def autostart():
     home = os.path.expanduser('~/.config/autostart.sh')
     subprocess.Popen([home])
+
+def lock():
+    lazy.cmd_spawn("sh -c ~/.config/qtile/lock")
 
 keys = [
     # A list of available commands that can be bound to keys can be found
@@ -64,7 +68,13 @@ keys = [
     Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
     Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl s +10%")),
     Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl s 10%-")),
-    Key([mod], "l", lazy.spawn("i3lock-color")),
+    Key([], "XF86AudioRaiseVolume", lazy.spawn("amixer -c 0 sset Master 5+ unmute"), desc='Volume Up'),
+    Key([], "XF86AudioLowerVolume", lazy.spawn("amixer -c 0 sset Master 5- unmute"), desc='volume down'),
+    Key([], "XF86AudioMute", lazy.spawn("amixer -q set Master toggle"), desc='Volume Mute'),
+    Key([], "XF86AudioPlay", lazy.spawn("playerctl play-pause"), desc='playerctl'),
+    Key([], "XF86AudioPrev", lazy.spawn("playerctl previous"), desc='playerctl'),
+    Key([], "XF86AudioNext", lazy.spawn("playerctl next"), desc='playerctl'),
+    Key([mod], "l", lazy.cmd_spawn("sh -c ~/.config/qtile/lock"), desc="Lock the computa"),
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
@@ -88,9 +98,8 @@ keys = [
     Key([mod], "t", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
-    Key([mod], "r", lazy.spawn("rofi -show drun"), desc="Spawn a command using a prompt widget"),
+    Key([mod], "r", lazy.spawn("rofi -show combi -combi-modi \"window,drun\" -modi combi -window-format \"{c} {t}\""), desc="Spawn a command using a prompt widget"),
 ]
-
 
 groups = [
         Group("1", label=""),
