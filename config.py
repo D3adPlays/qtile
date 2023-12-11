@@ -32,9 +32,19 @@ from libqtile.backend.wayland.inputs import Keyboard
 from libqtile.config import Click, Drag, Group, Key, Match, Screen
 from libqtile.lazy import lazy
 from libqtile import hook
+from libqtile.backend.wayland import InputConfig
 
 mod = "mod4"
 terminal = "kitty"
+
+wl_input_rules = {
+    "type:keyboard": InputConfig(
+        kb_repeat_rate=50,
+        kb_repeat_delay=300,
+        kb_layout="fr",
+    ),
+    "type:touchpad": InputConfig(drag=True, tap=True, natural_scroll=True),
+}
 
 @hook.subscribe.startup_once
 def autostart():
@@ -106,7 +116,7 @@ groups = [
         Group("2", spawn="kitty", label=""),
         Group("3" , spawn="firefox", label="󰈹"),
         Group("4", spawn="discord", label="󰙯"),
-        Group("5", spawn="tidal-hifi", label="󰌳")
+        Group("5", spawn="ncmpcpp", label="󰌳")
 ]
 
 # for i in range(len(groups)):
