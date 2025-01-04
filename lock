@@ -1,6 +1,6 @@
 #!/bin/sh
 
-alpha='dd'
+alpha=''
 background='#282a36'
 selection='#44475a'
 comment='#6272a4'

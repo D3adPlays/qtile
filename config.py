@@ -51,8 +51,7 @@ def autostart():
     home = os.path.expanduser('~/.config/autostart.sh')
     subprocess.Popen([home])
 
-def lock():
-    lazy.cmd_spawn("sh -c ~/.config/qtile/lock")
+lock_command = "sh -c ~/.config/qtile/lock"
 
 keys = [
     # A list of available commands that can be bound to keys can be found
@@ -84,7 +83,7 @@ keys = [
     Key([], "XF86AudioPlay", lazy.spawn("playerctl play-pause"), desc='playerctl'),
     Key([], "XF86AudioPrev", lazy.spawn("playerctl previous"), desc='playerctl'),
     Key([], "XF86AudioNext", lazy.spawn("playerctl next"), desc='playerctl'),
-    Key([mod], "l", lazy.cmd_spawn("sh -c ~/.config/qtile/lock"), desc="Lock the computa"),
+    Key([mod], "l", lazy.spawn(lock_command), desc="Lock the computa"),
     # Toggle between split and unsplit sides of stack.
     # Split = all windows displayed
     # Unsplit = 1 window displayed, like Max layout, but still with
@@ -111,17 +110,63 @@ keys = [
     Key([mod], "r", lazy.spawn("rofi -show combi -combi-modi \"window,drun\" -modi combi -window-format \"{c} {t}\""), desc="Spawn a command using a prompt widget"),
 ]
 
+#groups = [Group(i) for i in "123456789"]
+
 groups = [
-        Group("1", label=""),
-        Group("2", spawn="kitty", label=""),
-        Group("3" , spawn="firefox", label="󰈹"),
-        Group("4", spawn="discord", label="󰙯"),
-        Group("5", spawn="ncmpcpp", label="󰌳")
+        Group('1', label=""),
+        Group('2', spawn="kitty", label=""),
+        Group('3', spawn="firefox", label="󰈹"),
+        Group('4', spawn="discord", label="󰙯"),
+        Group('5', spawn="ncmpcpp", label="󰌳")
 ]
 
-# for i in range(len(groups)):
-#    keys.append(Key([mod], str(groups[i].name), lazy.group[str(i)].toscreen()))
-#    keys.append(Key([mod, "shift"], str(groups[i].name), lazy.window.togroup(str(i), switch_group=True)))
+# Key substitues for the french keyboard with "&é"'(-è_çà)='
+fr_groups = {
+    '1': 'ampersand',
+    '2': 'eacute',
+    '3': 'quotedbl',
+    '4': 'apostrophe',
+    '5': 'parenleft',
+    '6': 'minus',
+    '7': 'egrave',
+    '8': 'underscore',
+    '9': 'ccedilla',
+    '0': 'agrave'
+}
+
+for i in groups:
+    keys.extend(
+        [
+            # mod + group number = switch to group
+            Key(
+                [mod],
+                fr_groups[i.name],
+                lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name),
+            ),
+            # mod + shift + group number = switch to & move focused window to group
+            Key(
+                [mod, "shift"],
+                fr_groups[i.name],
+                lazy.window.togroup(i.name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(i.name),
+            ),
+            # Or, use below if you prefer not to switch to that group.
+            # # mod + shift + group number = move focused window to group
+            # Key([mod, "shift"], i.name, lazy.window.togroup(i.name),
+            #     desc="move focused window to group {}".format(i.name)),
+        ]
+    )
+
+
+#for i in groups:
+#    keys.extend([
+#        # mod1 + letter of group = switch to group
+#        Key([mod], i.name, lazy.group[i.name].toscreen()),
+#
+#       # mod1 + shift + letter of group = switch to & move focused window to group
+#        Key([mod, "shift"], i.name, lazy.window.togroup(i.name)),
+#    ])
 
 colors = [
     ["#2e3440", "#2e3440"],  # 0 background
@@ -433,7 +478,10 @@ reconfigure_screens = True
 auto_minimize = True
 
 # When using the Wayland backend, this can be used to configure input devices.
-wl_input_rules = None
+#
+wl_input_rules = {
+       "type:keyboard": InputConfig(kb_layout="fr"),
+}
 
 # XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
 # string besides java UI toolkits; you can see several discussions on the
